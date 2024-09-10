@@ -1,7 +1,10 @@
 import sys
 import tensorflow as tf
 from tensorflow.keras.utils import plot_model
-import pydot
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
 import graphviz
 
 # Definición de función para preparar los datos
@@ -27,6 +30,23 @@ def prepare_data():
     
     # Devolver el conjunto de datos cargado y preprocesado
     return mnist, x_train, y_train, x_test, y_test
+
+def visualize_dataset(n, x, y, save_path=None):
+    # Crear una figura con una cuadrícula de imágenes
+    plt.figure(figsize=(10,10))
+    for i in range(n*n):
+        plt.subplot(n, n, i+1)
+        plt.xticks([])
+        plt.yticks([])
+        plt.grid(False)
+        plt.imshow(x[i], cmap=plt.get_cmap('gray'))
+    
+    if save_path:
+        # Guarda la imagen en el archivo especificado
+        plt.savefig(save_path, bbox_inches='tight')
+        print(f"Imagen guardada en {save_path}")
+    
+    plt.show()
 
 # Definición de función para construir y entrenar el modelo de red convolucional
 def train_model(x_train, y_train):
@@ -70,11 +90,34 @@ def train_model(x_train, y_train):
     # Devolver el modelo entrenado
     return model
 
+def plot_confusion_matrix(y_test, y_pred, save_path=None):
+    # Convertir y_test de one-hot encoding a formato de etiqueta única
+    y_test_single_label = np.argmax(y_test, axis=1)
+    
+    # Calcular la matriz de confusión
+    cf_matrix = confusion_matrix(y_test_single_label, y_pred)
+    
+    # Crear la gráfica de la matriz de confusión
+    fig, ax = plt.subplots(figsize=(10, 10))
+    sns.heatmap(cf_matrix, annot=True, cbar=False, fmt='d')
+    plt.xlabel("Predicted", fontsize=18)
+    plt.ylabel("True", fontsize=18)
+    
+    # Guardar la imagen primero
+    if save_path:
+        plt.savefig(save_path, bbox_inches='tight')
+        print(f"Imagen guardada en {save_path}")
+    
+    # Mostrar la imagen después de guardarla
+    plt.show()
+
 # Ejecución del código principal
 if __name__ == '__main__':
     # Cargar los datos
     mnist, x_train, y_train, x_test, y_test = prepare_data()
     
+    visualize_dataset(10, x_test, y_test, save_path="dataset_visualization.png")
+
     # Entrenar el modelo
     model = train_model(x_train, y_train)
     
@@ -83,6 +126,10 @@ if __name__ == '__main__':
     
     # Evaluar el modelo en los datos de prueba y mostrar el rendimiento
     model.evaluate(x_test, y_test, verbose=2)
+
+    y_pred = np.argmax(model.predict(x_test), axis=-1)
+
+    plot_confusion_matrix(y_test, y_pred, save_path="confusion_matrix.png")
     
     # Guardar el modelo entrenado si se proporciona un nombre de archivo como argumento de la línea de comandos
     if len(sys.argv) == 2:
