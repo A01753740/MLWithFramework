@@ -45,6 +45,8 @@ El código está organizado de la siguiente manera:
 
 5. **Visualización del Modelo**:
    - Visualiza la arquitectura de la CNN, mostrando las dimensiones de las capas mediante `plot_model`.
+   - Visualiza la matriz de confusión.
+   - Visualiza el contenido de la base de datos.
 
 6. **Evaluación del modelo**:
    - Evalúa el modelo en el conjunto de prueba y muestra la precisión obtenida.
@@ -73,3 +75,5 @@ python handwriting.py nombre_del_modelo.h5
 ```bash
 python recognition.py nombre_del_modelo.h5
 ````
+
+
